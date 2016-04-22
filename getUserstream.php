@@ -1,5 +1,5 @@
 <?php
-//個人メモ：デプロイした時はmysql_connectとdetabase名を変更しておくこと
+//個人メモ：デプロイした時はmysql_connectとdatabase名を変更しておくこと
 
 /*	MySQL tableメモ
 create table `users`(
@@ -80,7 +80,7 @@ class MyUserConsumer extends OauthPhirehose
      *  should be being enqueued and processed asyncronously from the collection process. 
      */
 		 try {
-			$mysqlConnect = mysqli_connect("localhost", "twitter", "shibaura3ken") or die("mysql connect failed");
+			$mysqlConnect = mysqli_connect("host_name", "user_name", "password") or die("mysql connect failed");
 			
 			if (mysqli_select_db($mysqlConnect, "twitter_db")) {
 				date_default_timezone_set('Asia/Tokyo');
