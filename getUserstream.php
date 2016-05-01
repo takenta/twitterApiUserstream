@@ -189,7 +189,7 @@ class MyUserConsumer extends OauthPhirehose
 							mysqli_stmt_bind_param($stmt, 'iisi',
 								$retweetData['retweet_count'],
 								$retweetData['favorite_count'],
-								$tweetData['created_at'],
+								date( 'Y/m/d H:i:s', strtotime($tweetData['created_at'])),
 								$retweetedUserData['id']
 							);
 						}
