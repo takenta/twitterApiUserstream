@@ -50,7 +50,7 @@ require_once('../phirehose/lib/OauthPhirehose.php');
  *  as the 3rd parameter to the constructor, instead of using the UserStreamPhirehose
  *  class.
  */
-class MyUserConsumer extends OauthPhirehose 
+class MyUserConsumer extends OauthPhirehose
 {
   /**
    * First response looks like this:
@@ -77,32 +77,32 @@ class MyUserConsumer extends OauthPhirehose
     /*
      * In this simple example, we will just display to STDOUT rather than enqueue.
      * NOTE: You should NOT be processing tweets at this point in a real application, instead they
-     *  should be being enqueued and processed asyncronously from the collection process. 
+     *  should be being enqueued and processed asyncronously from the collection process.
      */
 		 try {
 			$mysqlConnect = mysqli_connect("host_name", "user_name", "password") or die("mysql connect failed");
-			
+
 			if (mysqli_select_db($mysqlConnect, "twitter_db")) {
 				date_default_timezone_set('Asia/Tokyo');
 				$tweetData = json_decode($status, true);
 				//print_r($tweetData);
-				
+
 				if (is_array($tweetData) && (! array_key_exists('event', $tweetData)) && (array_key_exists('text', $tweetData))) {
 					if (is_array($tweetData) && array_key_exists('retweeted_status', $tweetData)) {
 						$userData = $tweetData['retweeted_status']['user'];
 						$retweetData = $tweetData['retweeted_status'];
 						$retweetedUserData = mysqli_fetch_assoc(mysqli_query($mysqlConnect, "SELECT id, twitter_id_str, screen_name, disabled FROM users WHERE twitter_id_str = '{$userData['id_str']}';"));	//get id in users table (this id use to record tweet)
 						$existRetweet = mysqli_fetch_array(mysqli_query($mysqlConnect, "SELECT count(*) AS sum FROM tweets WHERE tweet_id_str = '{$retweetData['id_str']}';"), MYSQLI_ASSOC);
-						
+
 						//mysqlにはfalse -> 0，true -> 1を入れたい
 						$userData['protected'] = ($userData['protected'] == false) ? 0 : 1;
 						$userData['verified'] = ($userData['verified'] == false) ? 0 : 1;
 						$userData['geo_enabled'] = ($userData['geo_enabled'] == false) ? 0 : 1;
-						
-						if (empty($retweetedUserData)) {	//RTされたユーザーが登録されていなかった場合	
+
+						if (empty($retweetedUserData)) {	//RTされたユーザーが登録されていなかった場合
 							$stmt = mysqli_prepare($mysqlConnect, "INSERT INTO users (twitter_id_str, screen_name, name, description, url, favourites_count, protected, friends_count, followers_count, language, verified, statuses_count, profile_image_url, profile_background_image_url, geo_enabled, location, created, modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,? , ?, ?, ?, ?)");
-							mysqli_stmt_bind_param($stmt, 'sssssiiiisiississs', 
-								$userData['id_str'], 
+							mysqli_stmt_bind_param($stmt, 'sssssiiiisiississs',
+								$userData['id_str'],
 								$userData['screen_name'],
 								$userData['name'],
 								$userData['description'],
@@ -118,11 +118,11 @@ class MyUserConsumer extends OauthPhirehose
 								$userData['profile_background_image_url'],
 								$userData['geo_enabled'],
 								$userData['location'],
-								date( 'Y-m-d H:i:s', strtotime($userData['created_at'])),
-								date( 'Y-m-d H:i:s', strtotime($userData['created_at']))
+								date( 'Y/m/d H:i:s', strtotime($userData['created_at'])),
+								date( 'Y/m/d H:i:s', strtotime($userData['created_at']))
 							);
 						} else {
-							$stmt = mysqli_prepare($mysqlConnect, "UPDATE users SET 
+							$stmt = mysqli_prepare($mysqlConnect, "UPDATE users SET
 								screen_name = ?,
 								name = ?,
 								description = ?,
@@ -138,10 +138,10 @@ class MyUserConsumer extends OauthPhirehose
 								profile_background_image_url = ?,
 								geo_enabled = ?,
 								location = ?,
-								modified = ? 
+								modified = ?
 								WHERE twitter_id_str = ?");
-							
-							mysqli_stmt_bind_param($stmt, 'ssssiiiisiississs', 
+
+							mysqli_stmt_bind_param($stmt, 'ssssiiiisiississs',
 								$userData['screen_name'],
 								$userData['name'],
 								$userData['description'],
@@ -157,20 +157,20 @@ class MyUserConsumer extends OauthPhirehose
 								$userData['profile_background_image_url'],
 								$userData['geo_enabled'],
 								$userData['location'],
-								date( 'Y-m-d H:i:s', time()),
+								date( 'Y/m/d H:i:s', time()),
 								$userData['id_str']
 							);
 						}
-						
+
 						if (! mysqli_stmt_execute($stmt)) {
 							exit("Error 1: " . mysqli_stmt_error($stmt) . "\n");
 						}
 						mysqli_stmt_close($stmt);
 						$retweetedUserData = mysqli_fetch_assoc(mysqli_query($mysqlConnect, "SELECT id, twitter_id_str, screen_name, disabled FROM users WHERE twitter_id_str = '{$userData['id_str']}';"));	//RTされたユーザーID(users.id)を取得するため
-						
+
 						if ($existRetweet['sum'] == 0) {	//tweets tableにRTされたツイートが登録されていなかった場合
 							$stmt = mysqli_prepare($mysqlConnect, "INSERT INTO tweets (tweet_id_str, user_id, text, retweet_count, favorite_count, source, country, full_name, created, modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-							mysqli_stmt_bind_param($stmt, 'sisiisssss', 
+							mysqli_stmt_bind_param($stmt, 'sisiisssss',
 								$retweetData['id_str'],
 								$retweetedUserData['id'],
 								$retweetData['text'],
@@ -179,40 +179,40 @@ class MyUserConsumer extends OauthPhirehose
 								$retweetData['source'],
 								$retweetDataCountry,
 								$retweetDataFullName,
-								date( 'Y-m-d H:i:s', strtotime($retweetData['created_at'])),
-								date( 'Y-m-d H:i:s', strtotime($tweetData['created_at']))
+								date( 'Y/m/d H:i:s', strtotime($retweetData['created_at'])),
+								date( 'Y/m/d H:i:s', strtotime($tweetData['created_at']))
 							);
 							$retweetDataCountry = ($retweetData['place'] == false) ? null : $retweetData['place']['country'];
 							$retweetDataFullName = ($retweetData['place'] == false) ? null : $retweetData['place']['full_name'];
 						} else {	//tweets tableにRTされたツイートが登録されていた場合
 							$stmt = mysqli_prepare($mysqlConnect, "UPDATE tweets SET retweet_count = ?, favorite_count = ?,	modified = ? WHERE user_id = ?");
-							mysqli_stmt_bind_param($stmt, 'iisi', 
-								$retweetData['retweet_count'], 
-								$retweetData['favorite_count'], 
-								$tweetData['created_at'], 
+							mysqli_stmt_bind_param($stmt, 'iisi',
+								$retweetData['retweet_count'],
+								$retweetData['favorite_count'],
+								$tweetData['created_at'],
 								$retweetedUserData['id']
 							);
 						}
-						
+
 						if (! mysqli_stmt_execute($stmt)) {
 							exit("Error 2: " . mysqli_stmt_error($stmt) . "\n");
 						}
 						mysqli_stmt_close($stmt);
 					}
-					
+
 					/* Userを登録 */
 					$userData = $tweetData['user'];
 					$existUser = mysqli_fetch_array(mysqli_query($mysqlConnect, "SELECT count(*) AS sum FROM users WHERE twitter_id_str = '{$userData['id_str']}';"), MYSQLI_ASSOC);
-					
+
 					//mysqlにはfalse -> 0，true -> 1を入れたい
 					$userData['protected'] = ($userData['protected'] == false) ? 0 : 1;
 					$userData['verified'] = ($userData['verified'] == false) ? 0 : 1;
 					$userData['geo_enabled'] = ($userData['geo_enabled'] == false) ? 0 : 1;
-					
+
 					if ($existUser['sum'] == 0) {	//ユーザーが登録されていなかった場合
 						$stmt = mysqli_prepare($mysqlConnect, "INSERT INTO users (twitter_id_str, screen_name, name, description, url, favourites_count, protected, friends_count, followers_count, language, verified, statuses_count, profile_image_url, profile_background_image_url, geo_enabled, location, created, modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-						mysqli_stmt_bind_param($stmt, 'sssssiiiisiississs', 
-							$userData['id_str'], 
+						mysqli_stmt_bind_param($stmt, 'sssssiiiisiississs',
+							$userData['id_str'],
 							$userData['screen_name'],
 							$userData['name'],
 							$userData['description'],
@@ -228,11 +228,11 @@ class MyUserConsumer extends OauthPhirehose
 							$userData['profile_background_image_url'],
 							$userData['geo_enabled'],
 							$userData['location'],
-							date( 'Y-m-d H:i:s', strtotime($userData['created_at'])),
-							date( 'Y-m-d H:i:s', strtotime($userData['created_at']))
+							date( 'Y/m/d H:i:s', strtotime($userData['created_at'])),
+							date( 'Y/m/d H:i:s', strtotime($userData['created_at']))
 						);
 					} else {
-						$stmt = mysqli_prepare($mysqlConnect, "UPDATE users SET 
+						$stmt = mysqli_prepare($mysqlConnect, "UPDATE users SET
 							screen_name = ?,
 							name = ?,
 							description = ?,
@@ -248,11 +248,11 @@ class MyUserConsumer extends OauthPhirehose
 							profile_background_image_url = ?,
 							geo_enabled = ?,
 							location = ?,
-							modified = ? 
+							modified = ?
 							WHERE twitter_id_str = ?"
 						);
-						
-						mysqli_stmt_bind_param($stmt, 'ssssiiiisiississs', 
+
+						mysqli_stmt_bind_param($stmt, 'ssssiiiisiississs',
 							$userData['screen_name'],
 							$userData['name'],
 							$userData['description'],
@@ -268,23 +268,23 @@ class MyUserConsumer extends OauthPhirehose
 							$userData['profile_background_image_url'],
 							$userData['geo_enabled'],
 							$userData['location'],
-							date( 'Y-m-d H:i:s', time()),
+							date( 'Y/m/d H:i:s', time()),
 							$userData['id_str']
 						);
 					}
-					
+
 					if (! mysqli_stmt_execute($stmt)) {
 						exit("Error 3: " . mysqli_stmt_error($stmt) . "\n" . "query : ");
 					}
 					mysqli_stmt_close($stmt);
-					
+
 					/* Tweetを登録 */
 					$tweetUserData = mysqli_fetch_assoc(mysqli_query($mysqlConnect, "SELECT id, twitter_id_str, screen_name, disabled FROM users WHERE twitter_id_str = '{$userData['id_str']}';"));	//RTされたユーザーID(users.id)を取得するため
 					$existTweet = mysqli_fetch_array(mysqli_query($mysqlConnect, "SELECT count(*) AS sum FROM tweets WHERE tweet_id_str = '{$tweetData['id_str']}';"), MYSQLI_ASSOC);
-					
+
 					if ($existTweet['sum'] == 0) {	//tweets tableにツイートが登録されていなかった場合
 						$stmt = mysqli_prepare($mysqlConnect, "INSERT INTO tweets (tweet_id_str, user_id, text, retweet_count, favorite_count, source, country, full_name, created, modified) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-						mysqli_stmt_bind_param($stmt, 'sisiisssss', 
+						mysqli_stmt_bind_param($stmt, 'sisiisssss',
 							$tweetData['id_str'],
 							$tweetUserData['id'],
 							$tweetData['text'],
@@ -293,35 +293,35 @@ class MyUserConsumer extends OauthPhirehose
 							$tweetData['source'],
 							$tweetDataCountry,
 							$tweetDataFullName,
-							date( 'Y-m-d H:i:s', strtotime($tweetData['created_at'])),
-							date( 'Y-m-d H:i:s', strtotime($tweetData['created_at']))
+							date( 'Y/m/d H:i:s', strtotime($tweetData['created_at'])),
+							date( 'Y/m/d H:i:s', strtotime($tweetData['created_at']))
 						);
 						$tweetDataCountry = ($tweetData['place'] == false) ? null : $tweetData['place']['country'];
 						$tweetDataFullName = ($tweetData['place'] == false) ? null : $tweetData['place']['full_name'];
 					} else {	//tweets tableにツイートが登録されていた場合
 						$stmt = mysqli_prepare($mysqlConnect, "UPDATE tweets SET retweet_count = ?, favorite_count = ?,	modified = ? WHERE user_id = ?");
-						mysqli_stmt_bind_param($stmt, 'iisi', 
-							$tweetData['retweet_count'], 
-							$tweetData['favorite_count'], 
-							date( 'Y-m-d H:i:s', time()), 
+						mysqli_stmt_bind_param($stmt, 'iisi',
+							$tweetData['retweet_count'],
+							$tweetData['favorite_count'],
+							date( 'Y/m/d H:i:s', time()),
 							$tweetUserData['id']
 						);
 					}
-					
+
 					if (! mysqli_stmt_execute($stmt)) {
 						exit("Error 4: " . mysqli_stmt_error($stmt) . "\n");
 					}
 					mysqli_stmt_close($stmt);
 				} else if (is_array($tweetData) && array_key_exists('delete', $tweetData)) {
-					$deleteDate = date('Y-m-d H:i:s', (int)($tweetData['delete']['timestamp_ms']/1000));
-					
+					$deleteDate = date('Y/m/d H:i:s', (int)($tweetData['delete']['timestamp_ms']/1000));
+
 					/* ツイートの削除処理 */
-					$query = 
-						"UPDATE tweets SET 
+					$query =
+						"UPDATE tweets SET
 						modified = '{$deleteDate}',
-						disabled = 1 
+						disabled = 1
 						WHERE tweet_id_str = '{$tweetData['delete']['status']['id_str']}';";
-					
+
 					if (! mysqli_query($mysqlConnect, $query)) {
 						exit("mysql query ERROR 5\n QUERY : $query");
 					}
