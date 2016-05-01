@@ -118,8 +118,8 @@ class MyUserConsumer extends OauthPhirehose
 								$userData['profile_background_image_url'],
 								$userData['geo_enabled'],
 								$userData['location'],
-								date( 'Y/m/d H:i:s', strtotime($userData['created_at'])),
-								date( 'Y/m/d H:i:s', strtotime($userData['created_at']))
+								date( 'Y-m-d H:i:s', strtotime($userData['created_at'])),
+								date( 'Y-m-d H:i:s', strtotime($userData['created_at']))
 							);
 						} else {
 							$stmt = mysqli_prepare($mysqlConnect, "UPDATE users SET
@@ -157,7 +157,7 @@ class MyUserConsumer extends OauthPhirehose
 								$userData['profile_background_image_url'],
 								$userData['geo_enabled'],
 								$userData['location'],
-								date( 'Y/m/d H:i:s', time()),
+								date( 'Y-m-d H:i:s', time()),
 								$userData['id_str']
 							);
 						}
@@ -179,8 +179,8 @@ class MyUserConsumer extends OauthPhirehose
 								$retweetData['source'],
 								$retweetDataCountry,
 								$retweetDataFullName,
-								date( 'Y/m/d H:i:s', strtotime($retweetData['created_at'])),
-								date( 'Y/m/d H:i:s', strtotime($tweetData['created_at']))
+								date( 'Y-m-d H:i:s', strtotime($retweetData['created_at'])),
+								date( 'Y-m-d H:i:s', strtotime($tweetData['created_at']))
 							);
 							$retweetDataCountry = ($retweetData['place'] == false) ? null : $retweetData['place']['country'];
 							$retweetDataFullName = ($retweetData['place'] == false) ? null : $retweetData['place']['full_name'];
@@ -189,7 +189,7 @@ class MyUserConsumer extends OauthPhirehose
 							mysqli_stmt_bind_param($stmt, 'iisi',
 								$retweetData['retweet_count'],
 								$retweetData['favorite_count'],
-								date( 'Y/m/d H:i:s', strtotime($tweetData['created_at'])),
+								date( 'Y-m-d H:i:s', strtotime($tweetData['created_at'])),
 								$retweetedUserData['id']
 							);
 						}
@@ -228,8 +228,8 @@ class MyUserConsumer extends OauthPhirehose
 							$userData['profile_background_image_url'],
 							$userData['geo_enabled'],
 							$userData['location'],
-							date( 'Y/m/d H:i:s', strtotime($userData['created_at'])),
-							date( 'Y/m/d H:i:s', strtotime($userData['created_at']))
+							date( 'Y-m-d H:i:s', strtotime($userData['created_at'])),
+							date( 'Y-m-d H:i:s', strtotime($userData['created_at']))
 						);
 					} else {
 						$stmt = mysqli_prepare($mysqlConnect, "UPDATE users SET
@@ -268,7 +268,7 @@ class MyUserConsumer extends OauthPhirehose
 							$userData['profile_background_image_url'],
 							$userData['geo_enabled'],
 							$userData['location'],
-							date( 'Y/m/d H:i:s', time()),
+							date( 'Y-m-d H:i:s', time()),
 							$userData['id_str']
 						);
 					}
@@ -293,8 +293,8 @@ class MyUserConsumer extends OauthPhirehose
 							$tweetData['source'],
 							$tweetDataCountry,
 							$tweetDataFullName,
-							date( 'Y/m/d H:i:s', strtotime($tweetData['created_at'])),
-							date( 'Y/m/d H:i:s', strtotime($tweetData['created_at']))
+							date( 'Y-m-d H:i:s', strtotime($tweetData['created_at'])),
+							date( 'Y-m-d H:i:s', strtotime($tweetData['created_at']))
 						);
 						$tweetDataCountry = ($tweetData['place'] == false) ? null : $tweetData['place']['country'];
 						$tweetDataFullName = ($tweetData['place'] == false) ? null : $tweetData['place']['full_name'];
@@ -303,7 +303,7 @@ class MyUserConsumer extends OauthPhirehose
 						mysqli_stmt_bind_param($stmt, 'iisi',
 							$tweetData['retweet_count'],
 							$tweetData['favorite_count'],
-							date( 'Y/m/d H:i:s', time()),
+							date( 'Y-m-d H:i:s', time()),
 							$tweetUserData['id']
 						);
 					}
@@ -313,7 +313,7 @@ class MyUserConsumer extends OauthPhirehose
 					}
 					mysqli_stmt_close($stmt);
 				} else if (is_array($tweetData) && array_key_exists('delete', $tweetData)) {
-					$deleteDate = date('Y/m/d H:i:s', (int)($tweetData['delete']['timestamp_ms']/1000));
+					$deleteDate = date('Y-m-d H:i:s', (int)($tweetData['delete']['timestamp_ms']/1000));
 
 					/* ツイートの削除処理 */
 					$query =
